@@ -23,6 +23,7 @@ end
 
 def solve(wq, word_list, goal_word, goal_steps, prev_n = nil)
   curr_word = word_list.last
+  return word_list + [goal_word] if one_away?(curr_word, goal_word)
   (0..curr_word.length - 1).each do |n|
     next if n == prev_n
     chs =  curr_word.chars
@@ -33,7 +34,6 @@ def solve(wq, word_list, goal_word, goal_steps, prev_n = nil)
       next if /[A-Z]/ =~ next_word
       new_list = word_list + [next_word]
       puts new_list.inspect
-      return new_list if next_word == goal_word
       next unless new_list.length <= goal_steps
       resp = solve(wq, new_list, goal_word, goal_steps, n)
       return resp unless resp.nil?
@@ -42,6 +42,12 @@ def solve(wq, word_list, goal_word, goal_steps, prev_n = nil)
   nil
 end
 
+def one_away?(word1, word2)
+  word1.chars.reject do |c|
+    word2.include?(c)
+  end.size == 1
+end
+
 wq = WordQuery.new
-answer = solve(wq, ['comp'], 'rise', 4).inspect
+answer = solve(wq, ['buck'], 'ling', 4).inspect
 puts "\n\nANSWER: " + answer
