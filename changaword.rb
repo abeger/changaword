@@ -5,6 +5,7 @@ require 'wordnik'
 class WordQuery
   def initialize
     config
+    @freq_list = {}
   end
 
   def config
@@ -17,13 +18,27 @@ class WordQuery
 
   def retrieve(word)
     resp = Wordnik.words.search_words(query: word, max_length: word.length)
-    resp.map { |r| r['wordstring'] }
+    words = resp.map { |r| r['wordstring'] }
+    words.select do |w|
+      freq(w) >= 20
+    end
+  end
+
+  def freq(word)
+    unless @freq_list.key?(word)
+      resp = Wordnik.word.get_word_frequency(word, start_year: 1950)
+      @freq_list[word] = resp['totalCount']
+    end
+    @freq_list[word]
   end
 end
 
 def solve(wq, word_list, goal_word, goal_steps, prev_n = nil)
   curr_word = word_list.last
-  return word_list + [goal_word] if one_away?(curr_word, goal_word)
+  if word_list.size == goal_steps
+    return nil unless one_away?(curr_word, goal_word)
+    return word_list + [goal_word]
+  end
   (0..curr_word.length - 1).each do |n|
     next if n == prev_n
     chs =  curr_word.chars
@@ -34,7 +49,6 @@ def solve(wq, word_list, goal_word, goal_steps, prev_n = nil)
       next if /[A-Z]/ =~ next_word
       new_list = word_list + [next_word]
       puts new_list.inspect
-      next unless new_list.length <= goal_steps
       resp = solve(wq, new_list, goal_word, goal_steps, n)
       return resp unless resp.nil?
     end
@@ -43,11 +57,11 @@ def solve(wq, word_list, goal_word, goal_steps, prev_n = nil)
 end
 
 def one_away?(word1, word2)
-  word1.chars.reject do |c|
-    word2.include?(c)
+  word1.chars.each_with_index.reject do |c, i|
+    word2[i] == c
   end.size == 1
 end
 
 wq = WordQuery.new
-answer = solve(wq, ['buck'], 'ling', 4).inspect
+answer = solve(wq, ['comp'], 'rise', 5).inspect
 puts "\n\nANSWER: " + answer
