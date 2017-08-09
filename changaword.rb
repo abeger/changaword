@@ -20,7 +20,7 @@ class WordQuery
     resp = Wordnik.words.search_words(query: word, max_length: word.length)
     words = resp.map { |r| r['wordstring'] }
     words.select do |w|
-      freq(w) >= 20
+      /^[a-z]+$/ =~ w && freq(w) >= 20
     end
   end
 
@@ -51,7 +51,6 @@ class Changaword
       search_term = chs.join
       @word_query.retrieve(search_term).each do |next_word|
         next if word_list.include?(next_word)
-        next if /[A-Z]/ =~ next_word
         new_list = word_list + [next_word]
         puts new_list.inspect
         resp = solve(new_list, goal_word, goal_steps, n)
