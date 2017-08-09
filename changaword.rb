@@ -3,15 +3,15 @@
 require 'wordnik'
 
 class WordQuery
-  def initialize(key)
-    @key = key
+  def initialize(api_key)
+    @api_key = api_key
     @freq_list = {}
     config
   end
 
   def config
     Wordnik.configure do |c|
-      c.api_key = @key
+      c.api_key = @api_key
       c.response_format = 'json'
       c.logger = Logger.new('/dev/null')
     end
@@ -72,13 +72,12 @@ class Changaword
   end
 end
 
-def get_key
+def api_key
   File.open('key.txt', 'r') do |f|
     return f.read.strip
   end
 end
 
-puts get_key.inspect
-c = Changaword.new(WordQuery.new(get_key))
+c = Changaword.new(WordQuery.new(api_key))
 answer = c.solve(['said'], 'land', 2).inspect
 puts "\n\nANSWER: " + answer
