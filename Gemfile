@@ -7,4 +7,5 @@ gem 'wordnik'
 
 group :test, :development do
   gem 'rubocop'
+  gem 'reek'
 end

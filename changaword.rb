@@ -41,8 +41,14 @@ class Changaword
 
   def solve(word_list, goal_word, goal_steps, prev_n = nil)
     curr_word = word_list.last
-    if word_list.size == goal_steps
-      return nil unless one_away?(curr_word, goal_word)
+    if word_list.size == goal_steps - (goal_word.length - (goal_word.length - 2))
+      return nil unless diff(curr_word, goal_word) == (goal_word.length - 1)
+    end
+    if word_list.size == goal_steps - (goal_word.length - (goal_word.length - 1))
+      return nil unless diff(curr_word, goal_word) == (goal_word.length - 2)
+    end
+    if word_list.size == goal_steps - (goal_word.length - goal_word.length)
+      return nil unless diff(curr_word, goal_word) == (goal_word.length - 3)
       return word_list + [goal_word]
     end
     (0..curr_word.length - 1).each do |n|
@@ -61,14 +67,12 @@ class Changaword
     nil
   end
 
-  def one_away?(word1, word2)
-    diff(word1, word2) == 1
-  end
-
   def diff(word1, word2)
-    word1.chars.each_with_index.reject do |c, i|
+    s = word1.chars.each_with_index.reject do |c, i|
       word2[i] == c
     end.size
+    puts "** #{word1} <=> #{word2}: #{s}"
+    s
   end
 end
 
@@ -79,5 +83,5 @@ def api_key
 end
 
 c = Changaword.new(WordQuery.new(api_key))
-answer = c.solve(['said'], 'land', 2).inspect
+answer = c.solve(['seat'], 'rain', 6).inspect
 puts "\n\nANSWER: " + answer
