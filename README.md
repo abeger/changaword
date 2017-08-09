@@ -17,3 +17,9 @@ SAND
 LAND
 LANE
 ```
+
+##TODO
+
+* Command-line args
+* Short-circuit a chain if it's not getting closer to the answer
+* Multiple answers

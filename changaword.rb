@@ -33,35 +33,45 @@ class WordQuery
   end
 end
 
-def solve(wq, word_list, goal_word, goal_steps, prev_n = nil)
-  curr_word = word_list.last
-  if word_list.size == goal_steps
-    return nil unless one_away?(curr_word, goal_word)
-    return word_list + [goal_word]
+class Changaword
+  def initialize(word_query)
+    @word_query = word_query
   end
-  (0..curr_word.length - 1).each do |n|
-    next if n == prev_n
-    chs =  curr_word.chars
-    chs[n] = '?'
-    search_term = chs.join
-    wq.retrieve(search_term).each do |next_word|
-      next if word_list.include?(next_word)
-      next if /[A-Z]/ =~ next_word
-      new_list = word_list + [next_word]
-      puts new_list.inspect
-      resp = solve(wq, new_list, goal_word, goal_steps, n)
-      return resp unless resp.nil?
+
+  def solve(word_list, goal_word, goal_steps, prev_n = nil)
+    curr_word = word_list.last
+    if word_list.size == goal_steps
+      return nil unless one_away?(curr_word, goal_word)
+      return word_list + [goal_word]
     end
+    (0..curr_word.length - 1).each do |n|
+      next if n == prev_n
+      chs =  curr_word.chars
+      chs[n] = '?'
+      search_term = chs.join
+      @word_query.retrieve(search_term).each do |next_word|
+        next if word_list.include?(next_word)
+        next if /[A-Z]/ =~ next_word
+        new_list = word_list + [next_word]
+        puts new_list.inspect
+        resp = solve(new_list, goal_word, goal_steps, n)
+        return resp unless resp.nil?
+      end
+    end
+    nil
   end
-  nil
+
+  def one_away?(word1, word2)
+    diff(word1, word2) == 1
+  end
+
+  def diff(word1, word2)
+    word1.chars.each_with_index.reject do |c, i|
+      word2[i] == c
+    end.size
+  end
 end
 
-def one_away?(word1, word2)
-  word1.chars.each_with_index.reject do |c, i|
-    word2[i] == c
-  end.size == 1
-end
-
-wq = WordQuery.new
-answer = solve(wq, ['comp'], 'rise', 5).inspect
+c = Changaword.new(WordQuery.new)
+answer = c.solve(['said'], 'land', 2).inspect
 puts "\n\nANSWER: " + answer
